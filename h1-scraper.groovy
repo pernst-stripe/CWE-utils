@@ -32,7 +32,7 @@ def findCweRoots(graph, doc, xpath, view, id) {
 // Parse the 1000 CWE view ("Research Concepts")
 def builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 def xpath = XPathFactory.newInstance().newXPath()
-def doc = builder.parse(new File("cwe-1000-v4.8.xml")).documentElement
+def doc = builder.parse(new File("cwe-1000-v4.11.xml")).documentElement
 
 // Scrape H1 HTML page
 org.jsoup.nodes.Document hdoc = Jsoup.connect("https://docs.hackerone.com/hackers/types-of-weaknesses.html").get()
