@@ -131,15 +131,33 @@ while (scnr.hasNextLine()) {
     }
 }
 
+print ", "
+all.each {
+    print "\"CWE-$it.key\", "
+}
+println ""
 def aggregate = [:]
 all.each {
     def paths = findPathToRoot(docs, xpath, [it.key])
     //def root = paths[0]
     def root = (paths.size() > 1) ? paths[1] : paths[0]
-    def previous = aggregate[root] ? aggregate[root] : 0
-    aggregate[root] = previous + it.value
+    if (!aggregate[root]) {
+        aggregate[root]= []
+    } 
+    aggregate[root] << [it.key,it.value]
 }
 
+
 aggregate.each {
-    println "$it.key, \"${getCweName(docs, xpath, it.key)}\", $it.value"
+    print "\"CWE-${it.key}: ${getCweName(docs, xpath, it.key)}\""
+    def i=0
+    for (child:all.keySet()){
+        print ','
+        if ((aggregate[it.key][i]) && (child == aggregate[it.key][i][0])) {
+            print  aggregate[it.key][i][1]
+            i++
+        }
+    }
+    println ""
+    //, ${getCweName(docs, xpath, it.key)}, $it.value"
 }
