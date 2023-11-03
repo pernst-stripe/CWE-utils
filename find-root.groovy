@@ -4,9 +4,6 @@ import javax.xml.xpath.*
 import javax.xml.parsers.DocumentBuilderFactory
 import java.util.Collections
 
-@Grab('com.opencsv:opencsv:5.8')
-import com.opencsv.CSVReader
-
 def findPathToRoot(doc, xpath, cweId) {
     def map = [:]
     getRelationships(map, doc, xpath, cweId)
