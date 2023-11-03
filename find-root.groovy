@@ -95,11 +95,11 @@ for (cwe:cwes) {
     } */
 }
 
-println "id, depth, cwe"
+println "id,depth,cwe"
 for (cwe:cwes) {
     if (graph[cwe].size()>0) {
         for (d=1; d<=maxDepth; d++) {
-            println "$cwe, $d, ${ (d<=graph[cwe].size()) ? graph[cwe][d-1] : graph[cwe][graph[cwe].size()-1]}"
+            println "$cwe,$d,${ (d<=graph[cwe].size()) ? graph[cwe][d-1] : graph[cwe][graph[cwe].size()-1]}"
         }
     }
 }
