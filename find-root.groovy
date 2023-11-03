@@ -4,9 +4,12 @@ import javax.xml.xpath.*
 import javax.xml.parsers.DocumentBuilderFactory
 import java.util.Collections
 
+@Grab('com.opencsv:opencsv:5.8')
+import com.opencsv.CSVReader
+
 def findPathToRoot(doc, xpath, cweId) {
     def map = [:]
-    getRelationships(map, doc, xpath, 1000, cweId)
+    getRelationships(map, doc, xpath, cweId)
 
     def paths = []
     paths[0] = []
@@ -48,7 +51,7 @@ def getPathsToRoot(paths, index, map, current) {
     }
 }
 
-def getRelationships(map, doc, xpath, view, id) {
+def getRelationships(map, doc, xpath, id) {
     // Check if $id is a top-level CWE for this view
     org.w3c.dom.NodeList nl = xpath.evaluate("/Weakness_Catalog/Weaknesses/Weakness[@ID='$id' and not(Related_Weaknesses)]", doc, XPathConstants.NODESET )
     if (nl.getLength() == 1) {
@@ -56,21 +59,50 @@ def getRelationships(map, doc, xpath, view, id) {
             map[id] = []
         }
     } else {
-    xpath.evaluate("/Weakness_Catalog/Weaknesses/Weakness[@ID='$id']/Related_Weaknesses/Related_Weakness[@Nature='ChildOf' and @View_ID='$view']/@CWE_ID",
-        doc, XPathConstants.NODESET )
-    .each {
-        if (map[id]==null) {
-            map[id] = []
+        xpath.evaluate("/Weakness_Catalog/Weaknesses/Weakness[@ID='$id']/Related_Weaknesses/Related_Weakness[@Nature='ChildOf' and @View_ID='1000']/@CWE_ID",
+            doc, XPathConstants.NODESET )
+        .each {
+            if (map[id]==null) {
+                map[id] = []
+            }
+            map[id] << it.getValue()
+            getRelationships(map, doc, xpath, it.getValue())
         }
-        map[id] << it.getValue()
-        getRelationships(map, doc, xpath, view, it.getValue())
-    }
     }
 }
 
-// Parse the 1000 CWE view ("Research Concepts")
+def getAllCwes(list, doc, xpath) {
+    xpath.evaluate("/Weakness_Catalog/Weaknesses/Weakness/@ID", doc, XPathConstants.NODESET ).each {
+        list << (it.getValue() as Integer)
+    }
+}
+
+// Parse the 1000 CWE view ("Research Concepts") as XML
 def builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 def xpath = XPathFactory.newInstance().newXPath()
 def doc = builder.parse(new File("cwe-1000-v4.11.xml")).documentElement
 
-println findPathToRoot(doc, xpath, 328)
+def cwes = new TreeSet()
+getAllCwes(cwes, doc, xpath)
+
+def maxDepth = 0
+def graph = [:]
+for (cwe:cwes) {
+    def path = findPathToRoot(doc, xpath, cwe)
+    graph[cwe] = path
+    if (path.size() > maxDepth) {
+        maxDepth = path.size()
+    }
+   /* if (cwe > 50) {
+        break
+    } */
+}
+
+println "id, depth, cwe"
+for (cwe:cwes) {
+    if (graph[cwe].size()>0) {
+        for (d=1; d<=maxDepth; d++) {
+            println "$cwe, $d, ${ (d<=graph[cwe].size()) ? graph[cwe][d-1] : graph[cwe][graph[cwe].size()-1]}"
+        }
+    }
+}
