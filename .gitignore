@@ -25,3 +25,6 @@ hs_err_pid*
 # Temporary Generated Files
 *.csv
 *.json
+
+# MacOS
+.DS_Store

@@ -77,7 +77,7 @@ def getAllCwes(list, doc, xpath) {
 // Parse the 1000 CWE view ("Research Concepts") as XML
 def builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 def xpath = XPathFactory.newInstance().newXPath()
-def doc = builder.parse(new File("cwe-1000-v4.11.xml")).documentElement
+def doc = builder.parse(new File("cwe-1000-v4.15.xml")).documentElement
 
 def cwes = new TreeSet()
 getAllCwes(cwes, doc, xpath)
@@ -90,14 +90,11 @@ for (cwe:cwes) {
     if (path.size() > maxDepth) {
         maxDepth = path.size()
     }
-   /* if (cwe > 50) {
-        break
-    } */
 }
 
 println "id,depth,cwe"
 for (cwe:cwes) {
-    if (graph[cwe].size()>0) {
+    if (graph[cwe] && graph[cwe].size()>0) {
         for (d=1; d<=maxDepth; d++) {
             println "$cwe,$d,${ (d<=graph[cwe].size()) ? graph[cwe][d-1] : graph[cwe][graph[cwe].size()-1]}"
         }
